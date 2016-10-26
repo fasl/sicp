@@ -6,6 +6,7 @@
 (use text.tree)
 (use text.html-lite)
 
+
 (define nil '())
 
 ;(define (square-list items)
@@ -20,15 +21,15 @@
 
 ;(print (enumerate-interval 2 7))
 
-;(accumulate append
-;            nil
-;            (map (lambda (i)
-;                   (map (lambda (j) (list i j))
-;                        (enumerate-interval 1 (- i 1))))
-;                 (enumerate-interval 1 n)))
+(define (accumulate append 
+            nil
+            (map (lambda (i)
+                   (map (lambda (j) (list i j))
+                        (enumerate-interval 1 (- i 1))))
+                 (enumerate-interval 1 n))))
 				 
 (define (flatmap proc seq)
-  (accumulate append nil (map proc seq)))
+  (accumulate append '() (map proc seq)))
   
 (define (prime-sum? pair)
   (prime? (+ (car pair) (cadr pair))))
@@ -44,26 +45,30 @@
            (map (lambda (j) (list i j))
                  (enumerate-interval 1 (- i 1))))
          (enumerate-interval 1 n)))))
- 
+		 
+ (define (prime-sum-pairs2 n) 
+   (map make-sum-pair 
+        (filter prime-sum? (unique-pairs n)))) 
+
 ;(print (prime-sum-pairs 6))
+;(print (prime-sum-pairs2 6))
 
-(define (queens board-size)
-  (define (queen-cols k)  
-    (if (= k 0)
-        (list empty-board)
-        (filter
-         (lambda (positions) (safe? k positions))
-         (flatmap
-          (lambda (rest-of-queens)
-            (map (lambda (new-row)
-                   (adjoin-position new-row k rest-of-queens))
-                 (enumerate-interval 1 board-size)))
-          (queen-cols (- k 1)))))))
+;(define (unique-pair n)
+;   (enumerate-interval 1 n)
+;    )
+	
+(define (unique-pairs n)
+  (flatmap
+    (lambda (i)
+            (map (lambda (j) (list i j))
+                 (enumerate-interval 1 (- i 1))))
+    (enumerate-interval 1 n)))
 
-(define (adjoin-position new-row k rest-of-queens)
-   
-)		  
-		  
-(print (queens 5))
-		  
-		  
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter prime-sum? (unique-pairs n))))
+
+(print (prime-sum-pairs 6))
+	
+;(print (unique-pair 3))
+;(print (enumerate-interval 1 5))
