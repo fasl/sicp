@@ -6,9 +6,7 @@
   (list 'leaf symbol weight))
 
 (define (leaf? object) (eq? (car object) 'leaf))
-
 (define (symbol-leaf x) (cadr x))
-
 (define (weight-leaf x) (caddr x))
 
 (define (make-code-tree left right)
@@ -43,7 +41,7 @@
         ((= bit 1) (right-branch branch))
         (else (error "bad bit -- CHOOSE-BRANCH" bit))))
 
- (define (adjoin-set x set)
+(define (adjoin-set x set)
   (cond ((null? set) (list x))
         ((< (weight x) (weight (car set))) (cons x set))
         (else (cons (car set)
@@ -56,7 +54,6 @@
         (adjoin-set (make-leaf (car pair)    ; 記号
                                (cadr pair))  ; 頻度
                     (make-leaf-set (cdr pairs))))))
-
   
 ;符号化木と例題の通信文を定義する: 
 (define sample-tree
@@ -74,40 +71,40 @@
  ;; ----------------------------------------------- 
   
  ;; helpers 
- (define (element-of-set? x set) 
+(define (element-of-set? x set) 
    (cond ((null? set) false) 
          ((equal? x (car set)) true) 
          (else (element-of-set? x (cdr set))))) 
- (define (make-leaf symbol weight) 
+(define (make-leaf symbol weight) 
    (list 'leaf symbol weight)) 
- (define (leaf? object) 
+(define (leaf? object) 
    (eq? (car object) 'leaf)) 
- (define (symbol-leaf x) (cadr x)) 
- (define (left-branch tree) (car tree)) 
- (define (right-branch tree) (cadr tree)) 
- (define (symbols tree) 
+(define (symbol-leaf x) (cadr x)) 
+(define (left-branch tree) (car tree)) 
+(define (right-branch tree) (cadr tree)) 
+(define (symbols tree) 
    (if (leaf? tree) 
        (list (symbol-leaf tree)) 
        (caddr tree))) 
- (define (weight-leaf x) (caddr x)) 
- (define (make-code-tree left right) 
+(define (weight-leaf x) (caddr x)) 
+(define (make-code-tree left right) 
    (list left 
          right 
          (append (symbols left) (symbols right)) 
          (+ (weight left) (weight right)))) 
- (define (weight tree) 
+(define (weight tree) 
    (if (leaf? tree) 
        (weight-leaf tree) 
        (cadddr tree))) 
   
- (define (encode message tree) 
+(define (encode message tree) 
    (if (null? message) 
        '() 
        (append (encode-symbol (car message) tree) 
                (encode (cdr message) tree)))) 
   
  ;; solution 
- (define (encode-symbol smb tree) 
+(define (encode-symbol smb tree) 
    (define (branch-correct? branch) 
      (if (leaf? branch) 
          (equal? smb (symbol-leaf branch)) 
@@ -121,25 +118,46 @@
             (if (leaf? rb) '(1) (cons 1 (encode-symbol smb rb)))) 
            (else (error "bad symbol -- ENCODE-SYMBOL" bit))))) 
   
-; tests 
- (define sample-tree 
+ ;; tests 
+(define sample-tree 
    (make-code-tree (make-leaf 'A 4) 
                    (make-code-tree 
                     (make-leaf 'B 2) 
                     (make-code-tree (make-leaf 'D 1) 
                                     (make-leaf 'C 1))))) 
 ;(print (encode '(A D A B B C A) sample-tree))
-; (0 1 1 0 0 1 0 1 0 1 1 1 0) 
+;(0 1 1 0 0 1 0 1 0 1 1 1 0) 
 
-;Q68
-;encode手続きは引数として通信文と木をとり, 符号化された通信文のビットのリストを作る. 
-
+ ;Q2.69 
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
+  
+(define (successive-merge leaves) 
+   (if (null? (cdr leaves)) 
+       (car leaves) 
+       (successive-merge 
+        (adjoin-set (make-code-tree (car leaves) (cadr leaves)) 
+                    (cddr leaves))))) 
+							  
 (define (encode message tree)
   (if (null? message)
       '()
       (append (encode-symbol (car message) tree)
               (encode (cdr message) tree))))
 
-;encode-symbolは自分で書く手続きで, 与えられた木に従って与えられた記号を符号化したビットのリストを返すものである. 
-;encode-symbolの設計では, 記号が木になければ, エラーとしなければならない. 出来た手続きを問題2.67で得た結果と,
-; 例題の木を使って符号化し, 元の例題の通信文と同じかどうかを見てテストせよ.
+(define size-of-set length) 
+(define first-in-ordered-set car) 
+(define second-in-ordered-set cadr) 
+(define (subset set n) 
+     (if (= n 0) 
+         set  
+         (subset (cdr set) (- n 1)))) 
+
+(print (make-leaf-set '((A 4) (B 2) (C 1) (D 1))))
+
+(define test-tree (generate-huffman-tree '((A 3) (B 5) (C 6) (D 6)))) 
+(print (encode '(A B C D) test-tree) 
+
+
+
+
